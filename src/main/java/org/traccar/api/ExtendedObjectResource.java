@@ -53,6 +53,7 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
 
         var conditions = new LinkedList<Condition>();
 
+//&begin [Permission_Based]
         if (all) {
             if (permissionsService.notAdmin(getUserId())) {
                 conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
@@ -74,6 +75,7 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             permissionsService.checkPermission(Device.class, getUserId(), deviceId);
             conditions.add(new Condition.Permission(Device.class, deviceId, baseClass).excludeGroups());
         }
+//&end [Permission_Based]
 
         if (keyword != null && !keyword.isEmpty()) {
             conditions.add(new Condition.Contains(searchColumns, keyword));

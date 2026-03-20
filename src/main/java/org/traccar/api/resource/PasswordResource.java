@@ -52,7 +52,8 @@ public class PasswordResource extends BaseResource {
     @Inject
     private TextTemplateFormatter textTemplateFormatter;
 
-    @Path("reset")
+    //&begin [credentials]
+@Path("reset")
     @PermitAll
     @POST
     public Response reset(@FormParam("email") String email)
@@ -67,25 +68,30 @@ public class PasswordResource extends BaseResource {
         }
         return Response.ok().build();
     }
+//&end [credentials]
 
-    @Path("update")
+    //&begin [credentials]
+@Path("update")
     @PermitAll
     @POST
     public Response update(
             @FormParam("token") String token, @FormParam("password") String password)
             throws StorageException, GeneralSecurityException, IOException {
 
-        long userId = tokenManager.verifyToken(token).getUserId();
+        long userId = tokenManager.verifyToken(token).getUserId(); //&line [credentials]
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("id", userId)));
         if (user != null) {
+//&begin [key_storage]
             user.setPassword(password);
             storage.updateObject(user, new Request(
                     new Columns.Include("hashedPassword", "salt"),
                     new Condition.Equals("id", userId)));
+//&end [key_storage]
             return Response.ok().build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
+//&end [credentials]
 
 }

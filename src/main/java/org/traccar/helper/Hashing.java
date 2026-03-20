@@ -58,7 +58,8 @@ public final class Hashing {
     private Hashing() {
     }
 
-    private static byte[] function(char[] password, byte[] salt) {
+    //&begin [key_generation]
+private static byte[] function(char[] password, byte[] salt) {
         try {
             PBEKeySpec spec = new PBEKeySpec(password, salt, ITERATIONS, HASH_SIZE * Byte.SIZE);
             return factory.generateSecret(spec).getEncoded();
@@ -66,10 +67,12 @@ public final class Hashing {
             throw new SecurityException(e);
         }
     }
+//&end [key_generation]
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    public static HashingResult createHash(String password) {
+    //&begin [key_generation]
+public static HashingResult createHash(String password) {
         byte[] salt = new byte[SALT_SIZE];
         RANDOM.nextBytes(salt);
         byte[] hash = function(password.toCharArray(), salt);
@@ -77,14 +80,18 @@ public final class Hashing {
                 DataConverter.printHex(hash),
                 DataConverter.printHex(salt));
     }
+//&end [key_generation]
 
-    public static boolean validatePassword(String password, String hashHex, String saltHex) {
+    //&begin [credentials]
+public static boolean validatePassword(String password, String hashHex, String saltHex) {
         byte[] hash = DataConverter.parseHex(hashHex);
         byte[] salt = DataConverter.parseHex(saltHex);
         return slowEquals(hash, function(password.toCharArray(), salt));
     }
+//&end [credentials]
 
-    /**
+    //&begin [credentials]
+/**
      * Compares two byte arrays in length-constant time. This comparison method
      * is used so that password hashes cannot be extracted from an on-line
      * system using a timing attack and then attacked off-line.
@@ -96,5 +103,6 @@ public final class Hashing {
         }
         return diff == 0;
     }
+//&end [credentials]
 
 }

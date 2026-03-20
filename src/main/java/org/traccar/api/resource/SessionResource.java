@@ -74,7 +74,8 @@ public class SessionResource extends BaseResource {
     @Context
     private HttpServletRequest request;
 
-    @PermitAll
+    //&begin [credentials]
+@PermitAll
     @GET
     public User get(@QueryParam("token") String token) throws StorageException, IOException, GeneralSecurityException {
 
@@ -98,8 +99,10 @@ public class SessionResource extends BaseResource {
 
         throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
     }
+//&end [credentials]
 
-    @Path("{id}")
+    //&begin [authorization]
+@Path("{id}")
     @GET
     public User get(@PathParam("id") long userId) throws StorageException {
         permissionsService.checkUser(getUserId(), userId);
@@ -108,8 +111,10 @@ public class SessionResource extends BaseResource {
         SessionHelper.userLogin(actionLogger, request, user, null);
         return user;
     }
+//&end [authorization]
 
-    @PermitAll
+    //&begin [multifactor_authentication]
+@PermitAll
     @POST
     public User add(
             @FormParam("email") String email,
@@ -134,15 +139,19 @@ public class SessionResource extends BaseResource {
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
     }
+//&end [multifactor_authentication]
 
-    @DELETE
+    //&begin [session_timeout]
+@DELETE
     public Response remove() {
         actionLogger.logout(request, getUserId());
         request.getSession().removeAttribute(SessionHelper.USER_ID_KEY);
         return Response.noContent().build();
     }
+//&end [session_timeout]
 
-    @Path("token")
+    //&begin [credentials]
+@Path("token")
     @POST
     public String requestToken(
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
@@ -155,8 +164,10 @@ public class SessionResource extends BaseResource {
         actionLogger.token(request, getUserId(), data.getId());
         return token;
     }
+//&end [credentials]
 
-    @Path("token/revoke")
+    //&begin [key_revocation]
+@Path("token/revoke")
     @POST
     public Response revokeToken(
             @FormParam("token") String token) throws StorageException, GeneralSecurityException, IOException {
@@ -166,8 +177,10 @@ public class SessionResource extends BaseResource {
         storage.addObject(revokedToken, new Request(new Columns.Include("id")));
         return Response.noContent().build();
     }
+//&end [key_revocation]
 
-    @PermitAll
+    //&begin [single_sign_on]
+@PermitAll
     @Path("openid/auth")
     @GET
     public Response openIdAuth() {
@@ -176,8 +189,10 @@ public class SessionResource extends BaseResource {
         }
         return Response.seeOther(openIdProvider.createAuthUri()).build();
     }
+//&end [single_sign_on]
 
-    @PermitAll
+    //&begin [single_sign_on]
+@PermitAll
     @Path("openid/callback")
     @GET
     public Response requestToken() throws IOException, StorageException, ParseException, GeneralSecurityException {
@@ -186,5 +201,6 @@ public class SessionResource extends BaseResource {
         }
         return Response.seeOther(openIdProvider.handleCallback(request.getQueryString(), request)).build();
     }
+//&end [single_sign_on]
 
 }

@@ -58,8 +58,10 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
     @POST
     @Path("test")
     public Response test(@QueryParam("deviceId") long deviceId, Attribute entity) throws Exception {
+//&begin [Permission_Based]
         permissionsService.checkAdmin(getUserId());
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+//&end [Permission_Based]
 
         Position position = storage.getObject(Position.class, new Request(
                 new Columns.All(),

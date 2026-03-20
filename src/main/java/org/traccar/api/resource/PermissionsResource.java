@@ -53,12 +53,14 @@ public class PermissionsResource  extends BaseResource {
     @Context
     private HttpServletRequest request;
 
-    private void checkPermission(Permission permission) throws StorageException {
+    //&begin [Permission_Based]
+private void checkPermission(Permission permission) throws StorageException {
         if (permissionsService.notAdmin(getUserId())) {
             permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
             permissionsService.checkPermission(permission.getPropertyClass(), getUserId(), permission.getPropertyId());
         }
     }
+//&end [Permission_Based]
 
     private void checkPermissionTypes(List<LinkedHashMap<String, Long>> entities) {
         Set<String> keys = null;
@@ -73,8 +75,9 @@ public class PermissionsResource  extends BaseResource {
     @Path("bulk")
     @POST
     public Response add(List<LinkedHashMap<String, Long>> entities) throws Exception {
-        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly); //&line [input_validation]
         checkPermissionTypes(entities);
+//&begin [Permission_Based]
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission);
@@ -88,6 +91,7 @@ public class PermissionsResource  extends BaseResource {
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
+//&end [Permission_Based]
         return Response.noContent().build();
     }
 
@@ -101,6 +105,7 @@ public class PermissionsResource  extends BaseResource {
     public Response remove(List<LinkedHashMap<String, Long>> entities) throws Exception {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         checkPermissionTypes(entities);
+//&begin [Permission_Based]
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission);
@@ -114,6 +119,7 @@ public class PermissionsResource  extends BaseResource {
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
+//&end [Permission_Based]
         return Response.noContent().build();
     }
 

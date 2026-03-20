@@ -131,9 +131,11 @@ public class DeviceResource extends BaseObjectResource<Device> {
             var conditions = new LinkedList<Condition>();
 
             if (all) {
+//&begin [Permission_Based]
                 if (permissionsService.notAdmin(getUserId())) {
                     conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
                 }
+//&end [Permission_Based]
             } else {
                 if (userId == 0) {
                     conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
@@ -157,8 +159,10 @@ public class DeviceResource extends BaseObjectResource<Device> {
     @Path("{id}/accumulators")
     @PUT
     public Response updateAccumulators(DeviceAccumulators entity) throws Exception {
+//&begin [Permission_Based]
         permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
         permissionsService.checkEdit(getUserId(), Device.class, false, false);
+//&end [Permission_Based]
 
         Position position = storage.getObject(Position.class, new Request(
                 new Columns.All(), new Condition.LatestPositions(entity.getDeviceId())));
@@ -246,12 +250,14 @@ public class DeviceResource extends BaseObjectResource<Device> {
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
 
         User user = permissionsService.getUser(getUserId());
+//&begin [authorization]
         if (permissionsService.getServer().getBoolean(Keys.DEVICE_SHARE_DISABLE.getKey())) {
             throw new SecurityException("Sharing is disabled");
         }
         if (user.getTemporary()) {
             throw new SecurityException("Temporary user");
         }
+//&end [authorization]
         if (user.getExpirationTime() != null && user.getExpirationTime().before(expiration)) {
             expiration = user.getExpirationTime();
         }
@@ -273,15 +279,17 @@ public class DeviceResource extends BaseObjectResource<Device> {
             share.setExpirationTime(expiration);
             share.setTemporary(true);
             share.setReadonly(true);
+//&begin [access_quota_limitation]
             share.setLimitCommands(user.getLimitCommands() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_COMMANDS));
             share.setDisableReports(user.getDisableReports() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_REPORTS));
+//&end [access_quota_limitation]
 
             share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
 
             storage.addPermission(new Permission(User.class, share.getId(), Device.class, deviceId));
         }
 
-        return tokenManager.generateToken(share.getId(), expiration);
+        return tokenManager.generateToken(share.getId(), expiration); //&line [message_signing]
     }
 
 }

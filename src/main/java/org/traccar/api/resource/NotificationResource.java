@@ -93,7 +93,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @POST
     @Path("test")
     public Response testMessage() throws MessageException, StorageException {
-        User user = permissionsService.getUser(getUserId());
+        User user = permissionsService.getUser(getUserId()); //&line [authentication]
         for (Typed method : notificatorManager.getAllNotificatorTypes()) {
             notificatorManager.getNotificator(method.type()).send(null, user, new Event("test", 0), null);
         }
@@ -114,23 +114,27 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     public Response sendMessage(
             @PathParam("notificator") String notificator, @QueryParam("userId") List<Long> userIds,
             NotificationMessage message) throws MessageException, StorageException {
-        permissionsService.checkManager(getUserId());
+        permissionsService.checkManager(getUserId()); //&line [Permission_Based]
         List<User> users;
         if (userIds.isEmpty()) {
+//&begin [Permission_Based]
             if (permissionsService.notAdmin(getUserId())) {
                 users = storage.getObjects(User.class, new Request(new Columns.All(),
                         new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()));
             } else {
                 users = storage.getObjects(User.class, new Request(new Columns.All()));
             }
+//&end [Permission_Based]
         } else {
             users = new ArrayList<>();
             for (long userId : userIds) {
                 var conditions = new LinkedList<Condition>();
                 conditions.add(new Condition.Equals("id", userId));
                 if (permissionsService.notAdmin(getUserId())) {
+//&begin [Permission_Based]
                     conditions.add(new Condition.Permission(
                             User.class, getUserId(), ManagedUser.class).excludeGroups());
+//&end [Permission_Based]
                 }
                 users.add(storage.getObject(
                         User.class, new Request(new Columns.All(), Condition.merge(conditions))));

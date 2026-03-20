@@ -97,7 +97,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     @GET
     @Path("send")
     public Collection<Command> get(@QueryParam("deviceId") long deviceId) throws StorageException {
-        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId); //&line [Permission_Based]
         BaseProtocol protocol = getDeviceProtocol(deviceId);
 
         var commands = storage.getObjects(baseClass, new Request(
@@ -132,7 +132,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
         }
 
         if (groupId > 0) {
-            permissionsService.checkPermission(Group.class, getUserId(), groupId);
+            permissionsService.checkPermission(Group.class, getUserId(), groupId); //&line [Permission_Based]
             var devices = DeviceUtil.getAccessibleDevices(storage, getUserId(), List.of(), List.of(groupId));
             List<QueuedCommand> queuedCommands = new ArrayList<>();
             for (Device device : devices) {
@@ -147,7 +147,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
                 return Response.accepted(queuedCommands).build();
             }
         } else {
-            permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
+            permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId()); //&line [Permission_Based]
             QueuedCommand queuedCommand = commandsManager.sendCommand(entity);
             if (queuedCommand != null) {
                 return Response.accepted(queuedCommand).build();

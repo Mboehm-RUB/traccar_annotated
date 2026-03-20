@@ -91,21 +91,25 @@ public class ServerResource extends BaseResource {
     @Context
     private HttpServletRequest request;
 
-    @PermitAll
+    @PermitAll //&line [Permission_Based]
     @GET
     public Server get() throws StorageException {
         Server server = storage.getObject(Server.class, new Request(new Columns.All()));
         server.setEmailEnabled(mailManager.getEmailEnabled());
         server.setTextEnabled(smsManager != null);
         server.setGeocoderEnabled(geocoder != null);
+//&begin [single_sign_on]
         server.setOpenIdEnabled(openIdProvider != null);
         server.setOpenIdForce(openIdProvider != null && openIdProvider.getForce());
+//&end [single_sign_on]
+//&begin [Permission_Based]
         User user = permissionsService.getUser(getUserId());
         if (user != null) {
             if (user.getAdministrator()) {
                 server.setStorageSpace(Log.getStorageSpace());
             }
         } else {
+//&end [Permission_Based]
             server.setNewServer(UserUtil.isEmpty(storage));
         }
         return server;
@@ -113,7 +117,7 @@ public class ServerResource extends BaseResource {
 
     @PUT
     public Response update(Server server) throws Exception {
-        permissionsService.checkAdmin(getUserId());
+        permissionsService.checkAdmin(getUserId()); //&line [Permission_Based]
         storage.updateObject(server, new Request(
                 new Columns.Exclude("id"),
                 new Condition.Equals("id", server.getId())));

@@ -54,12 +54,14 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
     private boolean includeLogs;
     private Session session;
 
-    public AsyncSocket(ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage, long userId) {
+    //&begin [access_control]
+public AsyncSocket(ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage, long userId) {
         this.objectMapper = objectMapper;
         this.connectionManager = connectionManager;
         this.storage = storage;
         this.userId = userId;
     }
+//&end [access_control]
 
     @Override
     public void onWebSocketOpen(Session session) {

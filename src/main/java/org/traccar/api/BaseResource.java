@@ -34,12 +34,14 @@ public class BaseResource {
     @Inject
     protected PermissionsService permissionsService;
 
-    protected long getUserId() {
+    //&begin [authentication]
+protected long getUserId() {
         UserPrincipal principal = (UserPrincipal) securityContext.getUserPrincipal();
         if (principal != null) {
             return principal.getUserId();
         }
         return 0;
     }
+//&end [authentication]
 
 }

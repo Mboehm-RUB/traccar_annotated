@@ -69,7 +69,8 @@ public class UserResource extends BaseObjectResource<User> {
         super(User.class);
     }
 
-    @GET
+    //&begin [authorization]
+@GET
     public Stream<User> get(
             @QueryParam("userId") long userId, @QueryParam("deviceId") long deviceId,
             @QueryParam("excludeAttributes") boolean excludeAttributes,
@@ -94,8 +95,11 @@ public class UserResource extends BaseObjectResource<User> {
         return storage.getObjectsStream(baseClass, new Request(
                 columns, Condition.merge(conditions), new Order("name", false, limit, offset)));
     }
+//&end [authorization]
 
-    @Override
+    //&begin [one_time_password]
+//&begin [access_quota_limitation]
+@Override
     @PermitAll
     @POST
     public Response add(User entity) throws StorageException {
@@ -140,8 +144,11 @@ public class UserResource extends BaseObjectResource<User> {
         }
         return Response.ok(entity).build();
     }
+//&end [one_time_password]
+//&end [access_quota_limitation]
 
-    @Path("{id}")
+    //&begin [session_takeover_prevention]
+@Path("{id}")
     @DELETE
     public Response remove(@PathParam("id") long id) throws Exception {
         Response response = super.remove(id);
@@ -150,8 +157,10 @@ public class UserResource extends BaseObjectResource<User> {
         }
         return response;
     }
+//&end [session_takeover_prevention]
 
-    @Path("totp")
+    //&begin [one_time_password]
+@Path("totp")
     @PermitAll
     @POST
     public String generateTotpKey() throws StorageException {
@@ -160,5 +169,6 @@ public class UserResource extends BaseObjectResource<User> {
         }
         return new GoogleAuthenticator().createCredentials().getKey();
     }
+//&end [one_time_password]
 
 }

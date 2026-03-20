@@ -55,7 +55,8 @@ public class MediaFilter implements Filter {
         this.permissionsServiceProvider = permissionsServiceProvider;
     }
 
-    @Override
+    //&begin [Permission_Based]
+@Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
@@ -92,5 +93,6 @@ public class MediaFilter implements Filter {
             e.printStackTrace(httpResponse.getWriter());
         }
     }
+//&end [Permission_Based]
 
 }

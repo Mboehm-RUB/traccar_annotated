@@ -55,7 +55,8 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
         this.loginService = loginService;
     }
 
-    @Override
+    //&begin [credentials]
+@Override
     public void configure(JettyWebSocketServletFactory factory) {
         factory.setIdleTimeout(Duration.ofMillis(config.getLong(Keys.WEB_TIMEOUT)));
         factory.setCreator((req, resp) -> {
@@ -77,5 +78,6 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
             return null;
         });
     }
+//&end [credentials]
 
 }

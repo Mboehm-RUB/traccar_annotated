@@ -40,7 +40,8 @@ public class CorsResponseFilter implements ContainerResponseFilter {
     private static final String HEADERS_ALL = "origin, content-type, accept, authorization";
     private static final String METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
 
-    @Override
+    //&begin [access_control]
+@Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) throws IOException {
         if (!response.getHeaders().containsKey(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString())) {
             response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString(), HEADERS_ALL);
@@ -63,5 +64,6 @@ public class CorsResponseFilter implements ContainerResponseFilter {
             }
         }
     }
+//&end [access_control]
 
 }

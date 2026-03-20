@@ -65,7 +65,8 @@ public final class Log {
             this.template = rotateInterval.equalsIgnoreCase("HOUR") ? "yyyyMMddHH" : "yyyyMMdd";
         }
 
-        @Override
+        //&begin [logging]
+@Override
         public synchronized void publish(LogRecord record) {
             if (isLoggable(record)) {
                 try {
@@ -92,8 +93,10 @@ public final class Log {
                 }
             }
         }
+//&end [logging]
 
-        @Override
+        //&begin [logging]
+@Override
         public synchronized void flush() {
             if (writer != null) {
                 try {
@@ -103,8 +106,10 @@ public final class Log {
                 }
             }
         }
+//&end [logging]
 
-        @Override
+        //&begin [logging]
+@Override
         public synchronized void close() throws SecurityException {
             if (writer != null) {
                 try {
@@ -114,6 +119,7 @@ public final class Log {
                 }
             }
         }
+//&end [logging]
 
     }
 
@@ -163,7 +169,8 @@ public final class Log {
 
     }
 
-    public static void setupDefaultLogger() {
+    //&begin [logging]
+public static void setupDefaultLogger() {
         String path = null;
         URL url = ClassLoader.getSystemClassLoader().getResource(".");
         if (url != null) {
@@ -176,8 +183,10 @@ public final class Log {
         }
         setupLogger(path == null, path, Level.WARNING.getName(), false, true, "DAY");
     }
+//&end [logging]
 
-    public static void setupLogger(Config config) {
+    //&begin [logging]
+public static void setupLogger(Config config) {
         setupLogger(
                 config.getBoolean(Keys.LOGGER_CONSOLE),
                 config.getString(Keys.LOGGER_FILE),
@@ -186,8 +195,10 @@ public final class Log {
                 config.getBoolean(Keys.LOGGER_ROTATE),
                 config.getString(Keys.LOGGER_ROTATE_INTERVAL));
     }
+//&end [logging]
 
-    private static void setupLogger(
+    //&begin [logging]
+private static void setupLogger(
             boolean console, String file, String levelString,
             boolean fullStackTraces, boolean rotate, String rotateInterval) {
 
@@ -212,6 +223,7 @@ public final class Log {
 
         rootLogger.addHandler(handler);
     }
+//&end [logging]
 
     public static String exceptionStack(Throwable exception) {
         Throwable cause = exception.getCause();
