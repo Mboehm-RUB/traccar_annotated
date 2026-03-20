@@ -38,7 +38,7 @@ import jakarta.inject.Inject;
 import java.util.Objects;
 
 @RequestScoped
-//&begin [access control.authorization.Permission-Based]
+//&begin [Permission_Based]
 public class PermissionsService {
 
     private final Storage storage;
@@ -223,6 +223,6 @@ public class PermissionsService {
             }
         }
     }
-//&end [access control.authorization.Permission-Based]
+//&end [Permission_Based]
 
 }
