@@ -61,7 +61,8 @@ public class LoginService {
         forceOpenId = config.getBoolean(Keys.OPENID_FORCE);
     }
 
-    public LoginResult login(
+    //&begin [credentials]
+public LoginResult login(
             String scheme, String credentials) throws StorageException, GeneralSecurityException, IOException {
         switch (scheme.toLowerCase()) {
             case "bearer":
@@ -74,8 +75,10 @@ public class LoginService {
                 throw new SecurityException("Unsupported authorization scheme");
         }
     }
+//&end [credentials]
 
-    public LoginResult login(String token) throws StorageException, GeneralSecurityException, IOException {
+    //&begin [credentials]
+public LoginResult login(String token) throws StorageException, GeneralSecurityException, IOException {
         if (serviceAccountToken != null && serviceAccountToken.equals(token)) {
             return new LoginResult(new ServiceAccountUser());
         }
@@ -87,8 +90,10 @@ public class LoginService {
         }
         return new LoginResult(user, tokenData.getExpiration());
     }
+//&end [credentials]
 
-    public LoginResult login(String email, String password, Integer code) throws StorageException {
+    //&begin [multifactor_authentication]
+public LoginResult login(String email, String password, Integer code) throws StorageException {
         if (forceOpenId) {
             return null;
         }
@@ -116,8 +121,10 @@ public class LoginService {
         }
         return null;
     }
+//&end [multifactor_authentication]
 
-    public LoginResult login(String email, String name, Boolean administrator) throws StorageException {
+    //&begin [credentials]
+public LoginResult login(String email, String name, Boolean administrator) throws StorageException {
 
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
@@ -150,14 +157,18 @@ public class LoginService {
         checkUserEnabled(user);
         return new LoginResult(user);
     }
+//&begin [authorization]
+//&end [credentials]
     private void checkUserEnabled(User user) throws SecurityException {
         if (user == null) {
             throw new SecurityException("Unknown account");
         }
         user.checkDisabled();
     }
+//&end [authorization]
 
-    private void checkUserCode(User user, Integer code) throws SecurityException {
+    //&begin [multifactor_authentication]
+private void checkUserCode(User user, Integer code) throws SecurityException {
         String key = user.getTotpKey();
         if (key != null && !key.isEmpty()) {
             if (code == null) {
@@ -169,5 +180,6 @@ public class LoginService {
             }
         }
     }
+//&end [multifactor_authentication]
 
 }

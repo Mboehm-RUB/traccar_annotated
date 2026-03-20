@@ -84,7 +84,8 @@ public class OidcSessionManager {
         this.cryptoManager = cryptoManager;
     }
 
-    public String issueCode(
+    //&begin [one_time_password]
+public String issueCode(
             long userId,
             String clientId,
             URI redirectUri,
@@ -101,8 +102,10 @@ public class OidcSessionManager {
                 Instant.now().plus(DEFAULT_LIFETIME), nonce, codeChallenge, codeChallengeMethod));
         return code;
     }
+//&end [one_time_password]
 
-    public AuthorizationCode consumeCode(String code, String clientId, URI redirectUri, String codeVerifier) {
+    //&begin [one_time_password]
+public AuthorizationCode consumeCode(String code, String clientId, URI redirectUri, String codeVerifier) {
         AuthorizationCode data = codes.remove(code);
         if (data == null) {
             return null;
@@ -123,8 +126,10 @@ public class OidcSessionManager {
         }
         return data;
     }
+//&end [one_time_password]
 
-    public String generateIdToken(
+    //&begin [message_signing]
+public String generateIdToken(
             AuthorizationCode authCode,
             String clientId,
             TokenManager.TokenData tokenData,
@@ -159,6 +164,7 @@ public class OidcSessionManager {
         jwt.sign(new ECDSASigner(key));
         return jwt.serialize();
     }
+//&end [message_signing]
 
     public Set<String> parseScopes(String scope) {
         return scope == null ? Set.of() : Stream.of(scope.split("\\s+"))
@@ -166,12 +172,15 @@ public class OidcSessionManager {
                 .collect(Collectors.toSet());
     }
 
-    public Map<String, Object> getJwks() throws GeneralSecurityException, StorageException, JOSEException {
+    //&begin [key_distribution]
+public Map<String, Object> getJwks() throws GeneralSecurityException, StorageException, JOSEException {
         ECKey key = getSigningKey();
         return Map.of("keys", List.of(key.toPublicJWK().toJSONObject()));
     }
+//&end [key_distribution]
 
-    private boolean verifyCodeChallenge(AuthorizationCode data, String codeVerifier) {
+    //&begin [cryptographic_hashing]
+private boolean verifyCodeChallenge(AuthorizationCode data, String codeVerifier) {
         if (data.codeChallenge() == null) {
             return true;
         }
@@ -192,8 +201,10 @@ public class OidcSessionManager {
             return codeVerifier.equals(data.codeChallenge());
         }
     }
+//&end [cryptographic_hashing]
 
-    private ECKey getSigningKey() throws GeneralSecurityException, StorageException, JOSEException {
+    //&begin [key_generation]
+private ECKey getSigningKey() throws GeneralSecurityException, StorageException, JOSEException {
         ECKey key = signingKey;
         if (key == null) {
             synchronized (this) {
@@ -213,5 +224,6 @@ public class OidcSessionManager {
         }
         return key;
     }
+//&end [key_generation]
 
 }

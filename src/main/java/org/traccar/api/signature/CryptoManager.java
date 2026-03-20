@@ -47,7 +47,8 @@ public class CryptoManager {
         this.storage = storage;
     }
 
-    public byte[] sign(byte[] data) throws GeneralSecurityException, StorageException {
+    //&begin [message_signing]
+public byte[] sign(byte[] data) throws GeneralSecurityException, StorageException {
         if (privateKey == null) {
             initializeKeys();
         }
@@ -61,8 +62,10 @@ public class CryptoManager {
         System.arraycopy(data, 0, combined, 1 + block.length, data.length);
         return combined;
     }
+//&end [message_signing]
 
-    public byte[] verify(byte[] data) throws GeneralSecurityException, StorageException {
+    //&begin [message_authentication]
+public byte[] verify(byte[] data) throws GeneralSecurityException, StorageException {
         if (publicKey == null) {
             initializeKeys();
         }
@@ -77,15 +80,19 @@ public class CryptoManager {
         }
         return originalData;
     }
+//&end [message_authentication]
 
-    public KeyPair getKeyPair() throws GeneralSecurityException, StorageException {
+    //&begin [key_generation]
+public KeyPair getKeyPair() throws GeneralSecurityException, StorageException {
         if (publicKey == null) {
             initializeKeys();
         }
         return new KeyPair(publicKey, privateKey);
     }
+//&end [key_generation]
 
-    private void initializeKeys() throws StorageException, GeneralSecurityException {
+    //&begin [key_generation]
+private void initializeKeys() throws StorageException, GeneralSecurityException {
         KeystoreModel model = storage.getObject(KeystoreModel.class, new Request(new Columns.All()));
         if (model != null) {
             publicKey = KeyFactory.getInstance("EC")
@@ -106,5 +113,6 @@ public class CryptoManager {
             storage.addObject(model, new Request(new Columns.Exclude("id")));
         }
     }
+//&end [key_generation]
 
 }

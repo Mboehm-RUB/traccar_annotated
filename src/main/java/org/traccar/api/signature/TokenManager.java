@@ -42,7 +42,7 @@ public class TokenManager {
     private final CryptoManager cryptoManager;
     private final Storage storage;
 
-    private final SecureRandom random = new SecureRandom();
+    private final SecureRandom random = new SecureRandom(); //&line [source_of_randomness]
 
     public static class TokenData {
         @JsonProperty("i")
@@ -76,7 +76,9 @@ public class TokenManager {
         return generateToken(userId, null);
     }
 
-    public String generateToken(
+    //&begin [credentials]
+//&begin [message_signing]
+public String generateToken(
             long userId, Date expiration) throws IOException, GeneralSecurityException, StorageException {
         TokenData data = new TokenData();
         data.userId = userId;
@@ -89,8 +91,11 @@ public class TokenManager {
         byte[] encoded = objectMapper.writeValueAsBytes(data);
         return Base64.encodeBase64URLSafeString(cryptoManager.sign(encoded));
     }
+//&end [message_signing]
+//&end [credentials]
 
-    public TokenData verifyToken(String token) throws IOException, GeneralSecurityException, StorageException {
+    //&begin [credentials]
+public TokenData verifyToken(String token) throws IOException, GeneralSecurityException, StorageException {
         TokenData data = decodeToken(token);
         if (data.expiration.before(new Date())) {
             throw new SecurityException("Token has expired");
@@ -102,10 +107,13 @@ public class TokenManager {
         }
         return data;
     }
+//&end [credentials]
 
-    public TokenData decodeToken(String token) throws IOException, GeneralSecurityException, StorageException {
+    //&begin [credentials, authentication]
+public TokenData decodeToken(String token) throws IOException, GeneralSecurityException, StorageException {
         byte[] encoded = cryptoManager.verify(Base64.decodeBase64(token));
         return objectMapper.readValue(encoded, TokenData.class);
     }
+//&end [credentials, authentication]
 
 }

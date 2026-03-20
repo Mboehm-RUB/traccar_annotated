@@ -58,7 +58,8 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
     @Inject
     private Injector injector;
 
-    @Override
+    //&begin [credentials]
+@Override
     public void filter(ContainerRequestContext requestContext) {
 
         if (requestContext.getMethod().equals("OPTIONS")) {
@@ -124,5 +125,6 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         }
 
     }
+//&end [credentials]
 
 }
